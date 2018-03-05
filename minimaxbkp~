@@ -1,0 +1,110 @@
+def minimax(board,player,depth, isMaximising, alpha, beta, treeParent):
+    if(depth == 0):
+        evalScore = -(boardValue(board, player) )#+boardValue(board,player))
+        #print(evalScore)
+        return evalScore
+
+    if(isMaximising):
+        accum = []
+        locations = GetPlayerPositions(board,player)
+        for i in locations:
+            for j in GetPieceLegalMoves(board, i):
+                accum = accum + [(i,j)]
+        bestMoveVal = -9999
+        for i in accum:
+            tempBoard = list(board)
+            movePiece(tempBoard, i[0], i[1])
+            treeChild = tree(i)
+            bestMoveVal = max(bestMoveVal, minimax(tempBoard, player, depth-1, not isMaximising, alpha, beta, treeChild))
+            treeParent.AddSuccessor(treeChild)
+            alpha = max(alpha, bestMoveVal)
+            if(beta<=alpha):
+                return bestMoveVal
+        return bestMoveVal
+
+    else:
+        if(player == 10):
+            otherPlayer = 20
+        elif(player==20):
+            otherPlayer = 10
+        accum = []
+        locations = GetPlayerPositions(board,otherPlayer)
+        for i in locations:
+            for j in GetPieceLegalMoves(board, i):
+                accum = accum + [(i,j)]
+        bestMoveVal = 9999
+        for i in accum:
+            tempBoard = list(board)
+            movePiece(board, i[0], i[1])
+            treeChild = tree(i)
+            bestMoveVal = min(bestMoveVal, minimax(tempBoard, player, depth-1, not isMaximising, alpha, beta, treeChild))
+            treeParent.AddSuccessor(treeChild)
+            beta = min(beta, bestMoveVal)
+            if(beta<=alpha):
+                return bestMoveVal
+        return bestMoveVal
+def playerValue(board, player):
+    enemyPlayer = player%20+10
+    score =float(0)
+    positions = GetPlayerPositions(board,player)
+    for i in positions:
+        if(board[i]%10 ==0):
+            score+=10
+        elif(board[i]%10 ==1):
+            score+=30
+        elif(board[i]%10 ==2):
+            score+=30
+        elif(board[i]%10 ==3):
+            score+=50
+        elif(board[i]%10 ==4):
+            score+=90
+        elif(board[i]%10 ==5):
+            score+=900
+    if(player==10):
+        return -score
+    elif(player==20):
+        return score
+#    return score
+
+def boardValue(board,player):
+   if(player==20):
+        pawn = [0,  0,  0,  0,  0,  0,  0,  0, 5, 10, 10,-20,-20, 10, 10,  5, 5, -5,-10,  0,  0,-10, -5,  5, 0,  0,  0, 20, 20,  0,  0,  0, 5,  5, 10, 25, 25, 10,  5,  5,10, 10, 20, 30, 30, 20, 10, 10,50, 50, 50, 50, 50, 50, 50, 50, 0,  0,  0,  0,  0,  0,  0,  0]
+        knight = [-50,-40,-30,-30,-30,-30,-40,-50, -40,-20,  0,  5,  5,  0,-20,-40, -30,  5, 10, 15, 15, 10,  5,-30, -30,  0, 15, 20, 20, 15,  0,-30, -30,  5, 15, 20, 20, 15,  5,-30, -30,  0, 10, 15, 15, 10,  0,-30, -40,-20,  0,  0,  0,  0,-20,-40, -50,-40,-30,-30,-30,-30,-40,-50]
+        bishop = [-20,-10,-10,-10,-10,-10,-10,-20, -10,  5,  0,  0,  0,  0,  5,-10, -10, 10, 10, 10, 10, 10, 10,-10, -10,  0, 10, 10, 10, 10,  0,-10, -10,  5,  5, 10, 10,  5,  5,-10, -10,  0,  5, 10, 10,  5,  0,-10, -10,  0,  0,  0,  0,  0,  0,-10, -20,-10,-10,-10,-10,-10,-10,-20]
+        rook = [100,  0,  0,  5,  5,  0,  0,  100, -5,  0,  0,  0,  0,  0,  0, -5, -5,  0,  0,  0,  0,  0,  0, -5, -5,  0,  0,  0,  0,  0,  0, -5, -5,  0,  0,  0,  0,  0,  0, -5, -5,  0,  0,  0,  0,  0,  0, -5,  5, 10, 10, 10, 10, 10, 10,  5,  100,  0,  0,  0,  0,  0,  0,  100]
+        queen = [-20,-10,-10, -5, -5,-10,-10,-20,-10,  0,  5,  0,  0,  0,  0,-10,-10,  5,  5,  5,  5,  5,  0,-10,  0,  0,  5,  5,  5,  5,  0, -5, -5,  0,  5,  5,  5,  5,  0, -5,-10,  0,  5,  5,  5,  5,  0,-10,-10,  0,  0,  0,  0,  0,  0,-10,-20,-10,-10, -5, -5,-10,-10,-20]
+        #king middle game values
+        king = [ 20, 30, 10,  0,  0, 10, 30, 20, 20, 20,  0,  0,  0,  0, 20, 20,-10,-20,-20,-20,-20,-20,-20,-10,-20,-30,-30,-40,-40,-30,-30,-20,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30]
+
+
+   if(player==10):
+        pawn = [0,  0,  0,  0,  0,  0,  0,  0, 50, 50, 50, 50, 50, 50, 50, 50, 10, 10, 20, 30, 30, 20, 10, 10, 5,  5, 10, 25, 25, 10,  5,  5, 0,  0,  0, 20, 20,  0,  0,  0, 5, -5,-10,  0,  0,-10, -5,  5, 5, 10, 10,-20,-20, 10, 10,  5, 0,  0,  0,  0,  0,  0,  0,  0]
+        knight = [-50,-40,-30,-30,-30,-30,-40,-50, -40,-20,  0,  0,  0,  0,-20,-40, -30,  0, 10, 15, 15, 10,  0,-30, -30,  5, 15, 20, 20, 15,  5,-30, -30,  0, 15, 20, 20, 15,  0,-30, -30,  5, 10, 15, 15, 10,  5,-30, -40,-20,  0,  5,  5,  0,-20,-40, -50,-40,-30,-30,-30,-30,-40,-50]
+        bishop = [-20,-10,-10,-10,-10,-10,-10,-20, -10,  0,  0,  0,  0,  0,  0,-10, -10,  0,  5, 10, 10,  5,  0,-10, -10,  5,  5, 10, 10,  5,  5,-10, -10,  0, 10, 10, 10, 10,  0,-10, -10, 10, 10, 10, 10, 10, 10,-10, -10,  5,  0,  0,  0,  0,  5,-10, -20,-10,-10,-10,-10,-10,-10,-20]
+        rook = [100,  0,  0,  0,  0,  0,  0,  100,  5, 10, 10, 10, 10, 10, 10,  5, -5,  0,  0,  0,  0,  0,  0, -5, -5,  0,  0,  0,  0,  0,  0, -5, -5,  0,  0,  0,  0,  0,  0, -5, -5,  0,  0,  0,  0,  0,  0, -5, -5,  0,  0,  0,  0,  0,  0, -5,  100,  0,  0,  5,  5,  0,  0,  100]
+        queen = [-20,-10,-10, -5, -5,-10,-10,-20,-10,  0,  0,  0,  0,  0,  0,-10,-10,  0,  5,  5,  5,  5,  0,-10, -5,  0,  5,  5,  5,  5,  0, -5,  0,  0,  5,  5,  5,  5,  0, -5,-10,  5,  5,  5,  5,  5,  0,-10,-10,  0,  5,  0,  0,  0,  0,-10,-20,-10,-10, -5, -5,-10,-10,-20]
+        #king middle game values
+        king = [-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-20,-30,-30,-40,-40,-30,-30,-20,-10,-20,-20,-20,-20,-20,-20,-10, 20, 20,  0,  0,  0,  0, 20, 20, 20, 30, 10,  0,  0, 10, 30, 20]
+   
+   score = float(0)
+   positions = GetPlayerPositions(board,player)
+   for i in positions:
+        if(board[i]%10 ==0):
+            score+=pawn[i]
+        elif(board[i]%10 ==1):
+            score+=knight[i]
+        elif(board[i]%10 ==2):
+            score+=bishop[i]
+        elif(board[i]%10 ==3):
+            score+=rook[i]
+        elif(board[i]%10 ==4):
+            score+=queen[i]
+        elif(board[i]%10 ==5):
+            score+=king[i]
+   if(player==10):
+        return score
+   elif(player==20):
+        return -score
+#   return score
+
+
